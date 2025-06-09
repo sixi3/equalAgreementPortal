@@ -12,13 +12,13 @@ interface IDCardProps {
   onChange: (checked: boolean) => void
 }
 
-export function IDCard({ name, price, tat, partnerNetwork, method, checked, onChange }: IDCardProps) {
+export function IDCard({ name, price, tat, partnerNetwork, method, checked: _checked, onChange }: IDCardProps) {
   return (
-    <Card className={`w-full transition-shadow hover:shadow-lg cursor-pointer ${checked ? 'border-primary' : ''}`} onClick={() => onChange(!checked)}>
+    <Card className={`w-full transition-shadow hover:shadow-lg cursor-pointer ${'border-primary'}`} onClick={() => onChange(!_checked)}>
       <div className="p-3">
         <div className="flex flex-row items-center justify-between gap-3 pb-6">
           <div className="flex items-center gap-2">
-            <Checkbox id={name} checked={checked} />
+            <Checkbox id={name} checked={_checked} />
             <Label htmlFor={name} className="text-sm font-semibold cursor-pointer">
               {name}
             </Label>

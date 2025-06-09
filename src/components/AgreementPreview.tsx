@@ -1,7 +1,6 @@
 'use client';
 
 import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
-import { Check } from '@/lib/id-checks';
 
 // Define styles for the PDF document
 const styles = StyleSheet.create({

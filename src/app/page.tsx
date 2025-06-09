@@ -62,6 +62,7 @@ export default function Home() {
       selectedChecks: selectedCheckDetails,
       totalPrice
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Effect to generate logo data URL

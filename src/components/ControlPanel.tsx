@@ -33,9 +33,9 @@ function LogoUploader({ onLogoChange }: { onLogoChange: (file: File | null) => v
       }
 
       if (acceptedFiles.length > 0) {
-        const file = acceptedFiles[0]
-        setPreview(URL.createObjectURL(file))
-        onLogoChange(file)
+        const _file = acceptedFiles[0]
+        setPreview(URL.createObjectURL(_file))
+        onLogoChange(_file)
       }
     },
     [onLogoChange, preview]
@@ -118,7 +118,7 @@ interface ControlPanelProps {
 export default function ControlPanel({
   brandName,
   setBrandName,
-  logo: _logo,
+  logo,
   setLogo,
   selectedChecks,
   setSelectedChecks,
@@ -141,8 +141,8 @@ export default function ControlPanel({
     const allSelected = categoryCheckNames.every(name => selectedChecks[name]);
     
     const newSelected = { ...selectedChecks };
-    categoryCheckNames.forEach(name => {
-      newSelected[name] = !allSelected;
+    categoryCheckNames.forEach(_name => {
+      newSelected[_name] = !allSelected;
     });
     setSelectedChecks(newSelected);
   }
