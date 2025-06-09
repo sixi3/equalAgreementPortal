@@ -103,6 +103,7 @@ function LogoUploader({ onLogoChange }: { onLogoChange: (file: File | null) => v
 interface ControlPanelProps {
   brandName: string;
   setBrandName: (name: string) => void;
+  logo: File | null;
   setLogo: (file: File | null) => void;
   selectedChecks: { [key: string]: boolean };
   setSelectedChecks: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
@@ -117,6 +118,7 @@ interface ControlPanelProps {
 export default function ControlPanel({
   brandName,
   setBrandName,
+  logo: _logo,
   setLogo,
   selectedChecks,
   setSelectedChecks,
@@ -124,6 +126,7 @@ export default function ControlPanel({
   selectedCheckNames,
   onDownload,
   onPreview,
+  hasChanges,
   isPreviewLoading,
 }: ControlPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -149,7 +152,7 @@ export default function ControlPanel({
   }
 
   const filteredChecks = Object.entries(idChecks)
-    .filter(([category]) => categoryFilter === 'All' || category === categoryFilter)
+    .filter(([category, _]) => categoryFilter === 'All' || category === categoryFilter)
     .reduce((acc, [category, checks]) => {
       const filtered = checks.filter(check => check.name.toLowerCase().includes(searchTerm.toLowerCase()));
       if (filtered.length > 0) {
@@ -249,29 +252,28 @@ export default function ControlPanel({
                     <Badge key={name} variant="secondary" className="font-normal">{name}</Badge>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground/50">No checks selected</p>
+                  <p className="text-xs text-muted-foreground invisible">
+                    Selected checks will appear here. This is to prevent layout shift.
+                  </p>
                 )}
               </div>
             </div>
             <div className="flex justify-between items-center">
-              <div>
-                <p className="text-sm text-muted-foreground">Total per Onboard</p>
-                <p className="text-2xl font-bold text-primary">INR ₹{totalPrice}</p>
+              <div className="flex items-baseline">
+                <span className="text-2xl font-bold">₹{totalPrice.toLocaleString('en-IN')}</span>
+                <span className="text-sm text-muted-foreground ml-1">total</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="lg" onClick={onPreview} disabled={isPreviewLoading}>
-                  {isPreviewLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    'Preview'
-                  )}
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={onPreview} 
+                  disabled={!hasChanges || isPreviewLoading}
+                  className="relative"
+                >
+                  {isPreviewLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Preview
                 </Button>
-                <Button size="lg" disabled={totalPrice === 0 || !brandName} onClick={onDownload}>
-                  Download Agreement
-                </Button>
+                <Button onClick={onDownload} disabled={isPreviewLoading}>Download Agreement</Button>
               </div>
             </div>
           </div>

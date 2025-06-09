@@ -112,9 +112,8 @@ export function AgreementPreview({ brandName, logoUrl, selectedChecks, totalPric
               </View>
             )}
             <Image
-              src="/Equal-Logo.png"
+              src="/Equal Logo (1).png"
               style={styles.logo}
-              alt="Equal Logo"
             />
           </View>
           <View style={styles.brandNameContainer}>
@@ -138,7 +137,7 @@ export function AgreementPreview({ brandName, logoUrl, selectedChecks, totalPric
               <Text style={styles.tableCol}>{check.name}</Text>
               <Text style={styles.tableCol}>{check.method}</Text>
               <Text style={styles.tableCol}>{check.tat}</Text>
-              <Text style={styles.tableCol}>₹{check.price.toFixed(2)}</Text>
+              <Text style={styles.tableCol}>INR {check.price.toFixed(2)}</Text>
             </View>
           ))}
         </View>

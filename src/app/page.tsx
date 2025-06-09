@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header'
 import { Card, CardContent } from '@/components/ui/card'
 import ControlPanel from '@/components/ControlPanel'
@@ -29,17 +29,23 @@ export default function Home() {
 
   // Derived live state
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
-  const selectedCheckDetails = Object.keys(selectedChecks)
-    .filter(name => selectedChecks[name])
-    .map(name => {
-      for (const category in idChecks) {
-        const check = idChecks[category as keyof typeof idChecks].find(c => c.name === name);
-        if (check) return check;
-      }
-      return null;
-    })
-    .filter(Boolean) as { name: string; price: number; tat: string; method: string }[];
-  const totalPrice = selectedCheckDetails.reduce((acc, check) => acc + check.price, 0);
+
+  const selectedCheckDetails = useMemo(() => {
+    return Object.keys(selectedChecks)
+      .filter(name => selectedChecks[name])
+      .map(name => {
+        for (const category in idChecks) {
+          const check = idChecks[category as keyof typeof idChecks].find(c => c.name === name);
+          if (check) return check;
+        }
+        return null;
+      })
+      .filter(Boolean) as { name: string; price: number; tat: string; method: string }[];
+  }, [selectedChecks]);
+
+  const totalPrice = useMemo(() => {
+    return selectedCheckDetails.reduce((acc, check) => acc + check.price, 0);
+  }, [selectedCheckDetails]);
 
   // State for the preview pane
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
@@ -56,7 +62,7 @@ export default function Home() {
       selectedChecks: selectedCheckDetails,
       totalPrice
     });
-  }, [brandName, logoUrl, selectedCheckDetails, totalPrice]);
+  }, []);
 
   // Effect to generate logo data URL
   useEffect(() => {
@@ -92,14 +98,20 @@ export default function Home() {
   };
 
   const handleDownload = async () => {
-    if (!previewData) return; // Or use live data
+    // Always use the latest data for download
+    const currentData = {
+      brandName,
+      logoUrl,
+      selectedChecks: selectedCheckDetails,
+      totalPrice,
+    };
 
     const blob = await pdf((
       <AgreementPreview 
-        brandName={previewData.brandName}
-        logoUrl={previewData.logoUrl}
-        selectedChecks={previewData.selectedChecks}
-        totalPrice={previewData.totalPrice}
+        brandName={currentData.brandName}
+        logoUrl={currentData.logoUrl}
+        selectedChecks={currentData.selectedChecks}
+        totalPrice={currentData.totalPrice}
       />
     )).toBlob();
     
