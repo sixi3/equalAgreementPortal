@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import ControlPanel from '@/components/ControlPanel'
 import { idChecks } from '@/lib/id-checks'
 import dynamic from 'next/dynamic'
@@ -56,7 +56,7 @@ export default function Home() {
       selectedChecks: selectedCheckDetails,
       totalPrice
     });
-  }, []);
+  }, [brandName, logoUrl, selectedCheckDetails, totalPrice]);
 
   // Effect to generate logo data URL
   useEffect(() => {

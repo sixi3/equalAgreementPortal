@@ -3,7 +3,7 @@
 import { useState, useCallback } from 'react'
 import { useDropzone, FileRejection } from 'react-dropzone'
 import Image from 'next/image'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { IDCard } from '@/components/IDCard'
@@ -13,6 +13,7 @@ import { idChecks } from '@/lib/id-checks'
 import { Separator } from '@/components/ui/separator'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2 } from 'lucide-react'
+import { Check } from '@/lib/id-checks'
 
 function LogoUploader({ onLogoChange }: { onLogoChange: (file: File | null) => void }) {
   const [preview, setPreview] = useState<string | null>(null)
@@ -102,7 +103,6 @@ function LogoUploader({ onLogoChange }: { onLogoChange: (file: File | null) => v
 interface ControlPanelProps {
   brandName: string;
   setBrandName: (name: string) => void;
-  logo: File | null;
   setLogo: (file: File | null) => void;
   selectedChecks: { [key: string]: boolean };
   setSelectedChecks: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
@@ -117,7 +117,6 @@ interface ControlPanelProps {
 export default function ControlPanel({
   brandName,
   setBrandName,
-  logo,
   setLogo,
   selectedChecks,
   setSelectedChecks,
@@ -125,7 +124,6 @@ export default function ControlPanel({
   selectedCheckNames,
   onDownload,
   onPreview,
-  hasChanges,
   isPreviewLoading,
 }: ControlPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -135,7 +133,7 @@ export default function ControlPanel({
     setSelectedChecks((prev) => ({ ...prev, [name]: checked }))
   }
   
-  const handleSelectAll = (category: string, checks: any[]) => {
+  const handleSelectAll = (_category: string, checks: Check[]) => {
     const categoryCheckNames = checks.map(c => c.name);
     const allSelected = categoryCheckNames.every(name => selectedChecks[name]);
     
@@ -151,7 +149,7 @@ export default function ControlPanel({
   }
 
   const filteredChecks = Object.entries(idChecks)
-    .filter(([category, _]) => categoryFilter === 'All' || category === categoryFilter)
+    .filter(([category]) => categoryFilter === 'All' || category === categoryFilter)
     .reduce((acc, [category, checks]) => {
       const filtered = checks.filter(check => check.name.toLowerCase().includes(searchTerm.toLowerCase()));
       if (filtered.length > 0) {

@@ -13,7 +13,7 @@ const Header = () => {
               alt="Equal Logo"
               width={150}
               height={50}
-              className="h-10 w-auto"
+              className="h-8 w-auto"
               priority
             />
           </div>

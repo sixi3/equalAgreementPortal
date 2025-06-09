@@ -1,6 +1,7 @@
 'use client';
 
-import { Document, Page, Text, View, StyleSheet, Font, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Check } from '@/lib/id-checks';
 
 // Define styles for the PDF document
 const styles = StyleSheet.create({
@@ -101,13 +102,20 @@ export function AgreementPreview({ brandName, logoUrl, selectedChecks, totalPric
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             {logoUrl ? (
-              <Image src={logoUrl} style={styles.logo} />
+              <Image
+                src={logoUrl}
+                style={styles.logo}
+              />
             ) : (
               <View style={styles.logoPlaceholder}>
                 <Text style={styles.logoPlaceholderText}>Client Logo</Text>
               </View>
             )}
-            <Image src="/Equal logo (1).png" style={styles.logo} />
+            <Image
+              src="/Equal-Logo.png"
+              style={styles.logo}
+              alt="Equal Logo"
+            />
           </View>
           <View style={styles.brandNameContainer}>
             <Text style={styles.brandName}>Equal Digital BGV Commerical Proposal for {brandName || 'Your Brand Name'}</Text>
