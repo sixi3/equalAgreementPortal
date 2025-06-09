@@ -9,7 +9,7 @@ const Header = () => {
           {/* Logo Section */}
           <div className="flex items-center">
             <Image
-              src="/equalLogo.png"
+              src="/Equal Logo (1).png"
               alt="Equal Logo"
               width={150}
               height={50}

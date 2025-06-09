@@ -14,7 +14,7 @@ interface IDCardProps {
 
 export function IDCard({ name, price, tat, partnerNetwork, method, checked: _checked, onChange }: IDCardProps) {
   return (
-    <Card className={`w-full transition-shadow hover:shadow-lg cursor-pointer ${'border-primary'}`} onClick={() => onChange(!_checked)}>
+    <Card className={`w-full transition-shadow hover:shadow-lg cursor-pointer border-1 border-slate-200`} onClick={() => onChange(!_checked)}>
       <div className="p-3">
         <div className="flex flex-row items-center justify-between gap-3 pb-6">
           <div className="flex items-center gap-2">
