@@ -216,7 +216,7 @@ export default function ControlPanel({
           </div>
           
           {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto space-y-6">
+          <div className="flex-1 overflow-y-auto space-y-6 p-3">
             {Object.entries(filteredChecks).map(([category, checks]) => (
               <div key={category} className="space-y-3">
                 <div className="flex justify-between items-center">
