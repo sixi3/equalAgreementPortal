@@ -4,6 +4,7 @@ export interface Check {
   tat: string
   partnerNetwork: string
   method: string
+  insights?: string
 }
 
 export interface SelectedChecks {

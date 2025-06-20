@@ -7,7 +7,7 @@ const Header = () => {
       <div className="mx-auto px-4 xl:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             <Image
               src="/Equal Logo (1).png"
               alt="Equal Logo"
@@ -16,8 +16,11 @@ const Header = () => {
               className="h-8 w-auto"
               priority
             />
+            <p className="text-sm text-gray-500"> | </p>
+            <span className="text-sm text-gray-500">
+              <span className="font-regular">India's One-Stop-Shop for Digital Verifications 🏆</span>
+            </span>
           </div>
-          
           {/* Navigation/Actions Section */}
           <div className="flex items-center space-x-4">
             <Button>

@@ -10,11 +10,12 @@ interface IDCardProps {
   method: string
   checked: boolean
   onChange: (checked: boolean) => void
+  insights?: string
 }
 
-export function IDCard({ name, price, tat, partnerNetwork, method, checked: _checked, onChange }: IDCardProps) {
+export function IDCard({ name, price, tat, partnerNetwork, method, checked: _checked, onChange, insights }: IDCardProps) {
   return (
-    <Card className={`w-full transition-shadow hover:shadow-lg cursor-pointer border-1 border-slate-200`} onClick={() => onChange(!_checked)}>
+    <Card className={`w-full transition-shadow hover:shadow-lg cursor-pointer border-1 border-slate-200 overflow-hidden`} onClick={() => onChange(!_checked)}>
       <div className="p-3">
         <div className="flex flex-row items-center justify-between gap-3 pb-6">
           <div className="flex items-center gap-2">
@@ -40,6 +41,11 @@ export function IDCard({ name, price, tat, partnerNetwork, method, checked: _che
           </div>
         </div>
       </div>
+      {insights && (
+        <div className="mt-[-5px] p-2 bg-green-50 border-t border-green-200 text-xs text-green-800">
+          <span className="font-semibold">Insight:</span> {insights}
+        </div>
+      )}
     </Card>
   )
 } 

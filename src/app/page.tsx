@@ -4,10 +4,10 @@ import { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header'
 import { Card, CardContent } from '@/components/ui/card'
 import ControlPanel from '@/components/ControlPanel'
-import { idChecks } from '@/lib/id-checks'
+import { idChecks, Check } from '@/lib/id-checks'
 import dynamic from 'next/dynamic'
 import { pdf } from '@react-pdf/renderer'
-import { AgreementPreview } from '@/components/AgreementPreview';
+import { AgreementTemplate } from '@/components/AgreementTemplate'
 
 const AgreementDisplay = dynamic(() => import('@/components/AgreementDisplay'), {
   ssr: false,
@@ -16,8 +16,8 @@ const AgreementDisplay = dynamic(() => import('@/components/AgreementDisplay'), 
 
 interface PreviewData {
   brandName: string;
-  logoUrl: string | null;
-  selectedChecks: { name: string; price: number; tat: string; method: string }[];
+  logoUrl?: string;
+  selectedChecks: Check[];
   totalPrice: number;
 }
 
@@ -29,6 +29,7 @@ export default function Home() {
 
   // Derived live state
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   const selectedCheckDetails = useMemo(() => {
     return Object.keys(selectedChecks)
@@ -40,7 +41,7 @@ export default function Home() {
         }
         return null;
       })
-      .filter(Boolean) as { name: string; price: number; tat: string; method: string }[];
+      .filter(Boolean) as Check[];
   }, [selectedChecks]);
 
   const totalPrice = useMemo(() => {
@@ -55,15 +56,46 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true)
+
+    const checkIsMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+
     // Set initial preview data
     setPreviewData({
       brandName,
-      logoUrl,
+      logoUrl: logoUrl || undefined,
       selectedChecks: selectedCheckDetails,
       totalPrice
     });
+
+    return () => window.removeEventListener('resize', checkIsMobile);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Scroll to bottom on desktop after initial load
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Scroll to bottom on desktop when checks change
+  useEffect(() => {
+    if (window.innerWidth >= 1024) {
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  }, [selectedChecks]);
 
   // Effect to generate logo data URL
   useEffect(() => {
@@ -83,19 +115,42 @@ export default function Home() {
     setHasChanges(true);
   }, [brandName, logoUrl, selectedChecks]);
 
-  const handlePreviewUpdate = () => {
+  const handlePreviewUpdate = async () => {
     setIsPreviewLoading(true);
-    // Use a short timeout to allow the UI to update and show the loader
-    setTimeout(() => {
-      setPreviewData({
+
+    if (isMobile) {
+      const currentData = {
         brandName,
         logoUrl,
         selectedChecks: selectedCheckDetails,
-        totalPrice
-      });
-      setHasChanges(false);
+        totalPrice,
+      };
+      const blob = await pdf((
+        <AgreementTemplate 
+          brandName={currentData.brandName}
+          logoUrl={currentData.logoUrl || undefined}
+          selectedChecks={currentData.selectedChecks}
+          totalPrice={currentData.totalPrice}
+        />
+      )).toBlob();
+      
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
       setIsPreviewLoading(false);
-    }, 100); // 100ms timeout
+
+    } else {
+      // Use a short timeout to allow the UI to update and show the loader
+      setTimeout(() => {
+        setPreviewData({
+          brandName,
+          logoUrl: logoUrl || undefined,
+          selectedChecks: selectedCheckDetails,
+          totalPrice
+        });
+        setHasChanges(false);
+        setIsPreviewLoading(false);
+      }, 100); // 100ms timeout
+    }
   };
 
   const handleDownload = async () => {
@@ -108,9 +163,9 @@ export default function Home() {
     };
 
     const blob = await pdf((
-      <AgreementPreview 
+      <AgreementTemplate 
         brandName={currentData.brandName}
-        logoUrl={currentData.logoUrl}
+        logoUrl={currentData.logoUrl || undefined}
         selectedChecks={currentData.selectedChecks}
         totalPrice={currentData.totalPrice}
       />
@@ -149,20 +204,22 @@ export default function Home() {
           />
           
           {/* PDF Preview - Right Side */}
-          <Card className="h-full">
-             <CardContent className="h-full w-full flex rounded-lg items-center justify-center py-8">
-               {isClient && previewData ? (
-                 <AgreementDisplay
-                   brandName={previewData.brandName}
-                   logoUrl={previewData.logoUrl}
-                   selectedChecks={previewData.selectedChecks}
-                   totalPrice={previewData.totalPrice}
-                 />
-               ) : (
-                 <p className="text-muted-foreground">Click 'Preview' to see your agreement</p>
-               )}
-             </CardContent>
-           </Card>
+          <div className="hidden lg:block">
+            <Card className="h-full">
+               <CardContent className="h-full w-full flex rounded-lg items-center justify-center py-8">
+                 {isClient && previewData ? (
+                   <AgreementDisplay
+                     brandName={previewData.brandName}
+                     logoUrl={previewData.logoUrl}
+                     selectedChecks={previewData.selectedChecks}
+                     totalPrice={previewData.totalPrice}
+                   />
+                 ) : (
+                   <p className="text-muted-foreground">Click 'Preview' to see your agreement</p>
+                 )}
+               </CardContent>
+             </Card>
+          </div>
         </div>
       </main>
     </div>

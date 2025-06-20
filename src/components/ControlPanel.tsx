@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useDropzone, FileRejection } from 'react-dropzone'
 import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
@@ -12,8 +12,19 @@ import { Button } from '@/components/ui/button'
 import { idChecks } from '@/lib/id-checks'
 import { Separator } from '@/components/ui/separator'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2 } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
 import { Check } from '@/lib/id-checks'
+import { cn } from '@/lib/utils'
+
+const PRE_OFFER_CHECKS = ['Aadhaar', 'PAN Basic', 'Criminal Court (CCRV)'].sort();
+const POST_OFFER_CHECKS = [
+  'Aadhaar',
+  'PAN Advanced (Aadhaar <> PAN Linkage)',
+  'Bank Account Validation',
+  'Criminal Court (CCRV)',
+  'Highest Education*',
+  'Employment & Conduct (Per check) - Last 7 years',
+].sort();
 
 function LogoUploader({ onLogoChange }: { onLogoChange: (file: File | null) => void }) {
   const [preview, setPreview] = useState<string | null>(null)
@@ -131,6 +142,23 @@ export default function ControlPanel({
 }: ControlPanelProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
+  const [activePreset, setActivePreset] = useState<string | null>(null);
+
+  useEffect(() => {
+    const currentSelection = Object.keys(selectedChecks).filter(k => selectedChecks[k]).sort();
+    
+    let matchesPreset: string | null = null;
+    
+    if (JSON.stringify(currentSelection) === JSON.stringify(PRE_OFFER_CHECKS)) {
+        matchesPreset = 'pre-offer';
+    } else if (JSON.stringify(currentSelection) === JSON.stringify(POST_OFFER_CHECKS)) {
+        matchesPreset = 'post-offer';
+    }
+    
+    if (matchesPreset !== activePreset) {
+      setActivePreset(matchesPreset);
+    }
+  }, [selectedChecks, activePreset]);
 
   const handleCheckChange = (name: string, checked: boolean) => {
     setSelectedChecks((prev) => ({ ...prev, [name]: checked }))
@@ -151,6 +179,27 @@ export default function ControlPanel({
     setSelectedChecks({});
   }
 
+  const handlePresetChange = (value: string) => {
+    // If the clicked preset is already active, clear the selection.
+    if (activePreset === value) {
+      setSelectedChecks({});
+    } else {
+      // Otherwise, set the new preset's checks.
+      let checksToSelect: string[] = [];
+      if (value === 'pre-offer') {
+        checksToSelect = PRE_OFFER_CHECKS;
+      } else if (value === 'post-offer') {
+        checksToSelect = POST_OFFER_CHECKS;
+      }
+
+      const newSelected: { [key: string]: boolean } = {};
+      checksToSelect.forEach(name => {
+        newSelected[name] = true;
+      });
+      setSelectedChecks(newSelected);
+    }
+  };
+
   const filteredChecks = Object.entries(idChecks)
     .filter(([category, _]) => categoryFilter === 'All' || category === categoryFilter)
     .reduce((acc, [category, checks]) => {
@@ -162,7 +211,7 @@ export default function ControlPanel({
     }, {} as typeof idChecks);
 
   return (
-    <Card className="h-[100vh] bg-white/10 backdrop-blur-sm">
+    <Card className="h-[100vh] bg-white/50 backdrop-blur-md">
       <CardContent className="flex flex-col h-full p-4">
         {/* Branding Section - Fixed Height */}
         <div className="space-y-2 flex-shrink-0">
@@ -194,13 +243,26 @@ export default function ControlPanel({
                 Clear All
               </Button>
             </div>
-            <div className="flex gap-2">
-              <Input 
-                placeholder="Search for a check..." 
-                value={searchTerm} 
-                onChange={(e) => setSearchTerm(e.target.value)} 
-                className="flex-1"
-              />
+            <div className="flex gap-2 items-center">
+              <div className="relative flex-1">
+                <Input 
+                  placeholder="Search for a check" 
+                  value={searchTerm} 
+                  onChange={(e) => setSearchTerm(e.target.value)} 
+                  className="pr-8"
+                />
+                {searchTerm && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-0 top-0 h-full w-8 text-muted-foreground hover:text-foreground"
+                    onClick={() => setSearchTerm('')}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-slate-700">IN</p>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Filter by category" />
@@ -212,6 +274,34 @@ export default function ControlPanel({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            
+            <div className="pt-2">
+              <h3 className="text-[12px] font-medium text-slate-500 mb-2">BUNDLES:</h3>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePresetChange('pre-offer')}
+                  className={cn(
+                    "rounded-full",
+                    activePreset === 'pre-offer' && "border-green-800 bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700"
+                  )}
+                >
+                  Pre-Offer Checks
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePresetChange('post-offer')}
+                  className={cn(
+                    "rounded-full",
+                    activePreset === 'post-offer' && "border-green-800 bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700"
+                  )}
+                >
+                  Post-Offer Checks
+                </Button>
+              </div>
             </div>
           </div>
           
@@ -234,6 +324,7 @@ export default function ControlPanel({
                       method={check.method}
                       checked={!!selectedChecks[check.name]}
                       onChange={(checked) => handleCheckChange(check.name, !!checked)}
+                      insights={check.insights}
                     />
                   ))}
                 </div>
@@ -252,8 +343,8 @@ export default function ControlPanel({
                     <Badge key={name} variant="secondary" className="font-normal">{name}</Badge>
                   ))
                 ) : (
-                  <p className="text-xs text-muted-foreground invisible">
-                    Selected checks will appear here. This is to prevent layout shift.
+                  <p className="text-xs text-muted-foreground">
+                    Selected checks will appear here.
                   </p>
                 )}
               </div>

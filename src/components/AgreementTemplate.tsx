@@ -1,6 +1,10 @@
 import React from 'react'
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
+import { Document, Page, Text, View, StyleSheet, Image, Link, Font } from '@react-pdf/renderer'
 import { Check } from '@/types'
+
+import InterRegular from '@fontsource/inter/files/inter-latin-400-normal.woff'
+import InterBold from '@fontsource/inter/files/inter-latin-700-normal.woff'
+import InterItalic from '@fontsource/inter/files/inter-latin-400-italic.woff'
 
 interface AgreementTemplateProps {
   brandName: string
@@ -9,13 +13,49 @@ interface AgreementTemplateProps {
   totalPrice: number
 }
 
+Font.register({
+  family: 'Inter',
+  fonts: [
+    { src: InterRegular },
+    { src: InterBold, fontWeight: 'bold' },
+    { src: InterItalic, fontStyle: 'italic' },
+  ],
+})
+
+const valueAddedServices = [
+  { name: 'Equal Console', description: 'Equal console access shall be provided for end-end visibility on candidate e-onboarding status' },
+  { name: 'Equal Gateway instances', description: "Equal will provide unique gateway instances configuring the BGV checks for each Keka's customer" },
+  { name: 'Equal Reporting', description: 'Equal shall provide outreach logs for audit purpose' },
+  { name: 'Business Rule Engine', description: 'Equal will provide insights on the BGV reports based on business logic provided by Merchant' },
+  { name: 'Routing Engine', description: 'Equal will dynamically route request between partners for higher success rate' },
+];
+
+const aggregatorServices = [
+  { name: 'Partner Network Optimisation', description: 'Equal will constantly be optimising our partner network for higher success rate for every module opted' },
+  { name: 'Partner Additions', description: 'Equal will add more reliable partners for every module who has best-in-class network uptime with higher throughput' },
+  { name: 'Cloud Optimisation', description: 'Equal will leverage Amazon cloud infrastructure CDN services for higher network availability' },
+  { name: 'Cloud Security', description: 'Equal will leverage highest level of cyber security mesures enabling zero trust security architecture' },
+];
+
+const pricingDetails = [
+  { term: 'Set-up Fee + Integration cost (One time Fee)', amount: 'INR 10,00,000', strikethrough: true },
+  { term: 'Value-added Service paid yearly once (Prepay Annual)', amount: 'INR 12,00,000', strikethrough: true },
+  { term: 'Payment terms', amount: 'Post-pay Monthly - Based on actual consumption' },
+];
+
+const pricingNotes = [
+  "A minor % of Education verification may incur an additional challan cost that's charged by the Universities at the time of verifications - this charge will be passed on at actuals",
+  "AMC + Value-added Service paid yearly once (Prepay Annual) that includes Updates, Patches, Bug fixes & Customer Support",
+  "All prices are exclusive of applicable taxes"
+];
+
 const styles = StyleSheet.create({
   page: {
     flexDirection: 'column',
     backgroundColor: '#FFFFFF',
     padding: 40,
     fontSize: 10,
-    fontFamily: 'Helvetica',
+    fontFamily: 'Inter',
   },
   header: {
     flexDirection: 'row',
@@ -23,13 +63,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderBottom: 2,
-    borderBottomColor: '#22c55e',
+    borderBottomColor: '#00b140',
     paddingBottom: 20,
   },
   logo: {
     width: 120,
-    height: 30,
+    height: 24,
     objectFit: 'contain',
+  },
+  logoPlaceholder: {
+    width: 120,
+    height: 30,
+    border: '1px dashed #9ca3af',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  logoPlaceholderText: {
+    fontSize: 8,
+    color: '#6b7280',
   },
   title: {
     fontSize: 20,
@@ -45,13 +96,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   section: {
+    marginTop: 20,
     marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 12,
     fontWeight: 'bold',
     color: '#374151',
-    marginBottom: 10,
     textTransform: 'uppercase',
   },
   brandSection: {
@@ -73,6 +124,7 @@ const styles = StyleSheet.create({
     borderColor: '#e5e7eb',
     borderRightWidth: 0,
     borderBottomWidth: 0,
+    marginTop: 10,
   },
   tableRow: {
     margin: 'auto',
@@ -85,7 +137,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 0,
     borderTopWidth: 0,
     borderColor: '#e5e7eb',
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#00b140',
     padding: 8,
   },
   tableCol: {
@@ -100,11 +152,12 @@ const styles = StyleSheet.create({
   tableCellHeader: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#374151',
+    color: '#FFFFFF',
   },
   tableCell: {
-    fontSize: 9,
-    color: '#6b7280',
+    fontSize: 10,
+    fontWeight: 'normal',
+    color: '#000000',
   },
   totalSection: {
     marginTop: 20,
@@ -124,6 +177,43 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#22c55e',
   },
+  pricingTableRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 8,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#d1fae5',
+  },
+  pricingTableCellTerm: {
+    fontSize: 10,
+    color: '#374151',
+    width: '60%',
+  },
+  pricingTableCellAmount: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    width: '40%',
+    textAlign: 'right',
+  },
+  notesSection: {
+    marginTop: 15,
+    backgroundColor: '#f8fafc',
+    padding: 10,
+    borderRadius: 3,
+  },
+  noteText: {
+    fontSize: 8,
+    color: '#6b7280',
+    lineHeight: 1.4,
+    marginBottom: 4,
+  },
+  separator: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#99e6b3',
+    marginVertical: 15,
+  },
   footer: {
     marginTop: 30,
     paddingTop: 20,
@@ -134,10 +224,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   date: {
-    textAlign: 'right',
     fontSize: 9,
     color: '#6b7280',
-    marginBottom: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
 })
 
@@ -148,33 +242,31 @@ export function AgreementTemplate({ brandName, logoUrl, selectedChecks, totalPri
     year: 'numeric'
   })
 
+  const isEducationCheckSelected = selectedChecks.some(check => check.name === 'Highest Education*');
+  const checksWithInsights = selectedChecks.filter(check => check.insights);
+
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
+      <Page size="A4" style={styles.page} wrap>
         {/* Header */}
         <View style={styles.header}>
-          {logoUrl && <Image style={styles.logo} src={logoUrl} />}
+          {logoUrl ? (
+            <Image style={styles.logo} src={logoUrl} />
+          ) : (
+            <View style={styles.logoPlaceholder}>
+              <Text style={styles.logoPlaceholderText}>Client Logo</Text>
+            </View>
+          )}
           <Text style={styles.title}>ID Verification Agreement</Text>
-          <View style={{ width: 120 }} />
+          <Image style={styles.logo} src="/equal-logo.png" />
         </View>
-
-        {/* Date */}
-        <Text style={styles.date}>Date: {currentDate}</Text>
-
-        {/* Brand Section */}
-        {brandName && (
-          <View style={styles.brandSection}>
-            <Text style={styles.sectionTitle}>Client Information</Text>
-            <Text style={styles.brandName}>{brandName}</Text>
-            <Text style={{ fontSize: 9, color: '#6b7280' }}>
-              This agreement outlines the ID verification services to be provided.
-            </Text>
-          </View>
-        )}
 
         {/* Agreement Text */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Agreement Terms</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Agreement Terms</Text>
+            <Text style={styles.date}>Date: {currentDate}</Text>
+          </View>
           <Text style={{ fontSize: 10, lineHeight: 1.5, color: '#374151', marginBottom: 10 }}>
             This agreement is entered into between Equal Digital and {brandName || '[Client Name]'} for the provision 
             of identity verification services as detailed below. The services will be delivered according to the 
@@ -222,7 +314,7 @@ export function AgreementTemplate({ brandName, logoUrl, selectedChecks, totalPri
                     <Text style={styles.tableCell}>{check.partnerNetwork}</Text>
                   </View>
                   <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>₹{check.price}</Text>
+                    <Text style={styles.tableCell}>INR {check.price}</Text>
                   </View>
                 </View>
               ))}
@@ -230,16 +322,120 @@ export function AgreementTemplate({ brandName, logoUrl, selectedChecks, totalPri
           </View>
         )}
 
+        {/* Insights Table */}
+        {checksWithInsights.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Insights</Text>
+            <View style={styles.table}>
+              {/* Table Header */}
+              <View style={styles.tableRow}>
+                <View style={[styles.tableColHeader, { width: '30%' }]}>
+                  <Text style={styles.tableCellHeader}>Service</Text>
+                </View>
+                <View style={[styles.tableColHeader, { width: '70%' }]}>
+                  <Text style={styles.tableCellHeader}>Insight Description</Text>
+                </View>
+              </View>
+              
+              {/* Table Rows */}
+              {checksWithInsights.map((check, index) => (
+                <View style={styles.tableRow} key={index}>
+                  <View style={[styles.tableCol, { width: '30%' }]}>
+                    <Text style={styles.tableCell}>{check.name}</Text>
+                  </View>
+                  <View style={[styles.tableCol, { width: '70%' }]}>
+                    <Text style={styles.tableCell}>{check.insights}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Value Added Services */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Value-added Services</Text>
+          <View style={styles.table}>
+            {/* Table Header */}
+            <View style={styles.tableRow}>
+              <View style={[styles.tableColHeader, { width: '30%' }]}>
+                <Text style={styles.tableCellHeader}>Service</Text>
+              </View>
+              <View style={[styles.tableColHeader, { width: '70%' }]}>
+                <Text style={styles.tableCellHeader}>Description</Text>
+              </View>
+            </View>
+            
+            {/* Table Rows */}
+            {valueAddedServices.map((service, index) => (
+              <View style={styles.tableRow} key={index}>
+                <View style={[styles.tableCol, { width: '30%' }]}>
+                  <Text style={styles.tableCell}>{service.name}</Text>
+                </View>
+                <View style={[styles.tableCol, { width: '70%' }]}>
+                  <Text style={styles.tableCell}>{service.description}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Aggregator Services */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Aggregator Services</Text>
+          <View style={styles.table}>
+            {/* Table Header */}
+            <View style={styles.tableRow}>
+              <View style={[styles.tableColHeader, { width: '30%' }]}>
+                <Text style={styles.tableCellHeader}>Service</Text>
+              </View>
+              <View style={[styles.tableColHeader, { width: '70%' }]}>
+                <Text style={styles.tableCellHeader}>Description</Text>
+              </View>
+            </View>
+            
+            {/* Table Rows */}
+            {aggregatorServices.map((service, index) => (
+              <View style={styles.tableRow} key={index}>
+                <View style={[styles.tableCol, { width: '30%' }]}>
+                  <Text style={styles.tableCell}>{service.name}</Text>
+                </View>
+                <View style={[styles.tableCol, { width: '70%' }]}>
+                  <Text style={styles.tableCell}>{service.description}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+
         {/* Total Price */}
         <View style={styles.totalSection}>
           <Text style={styles.totalLabel}>Total Cost per Onboarding:</Text>
-          <Text style={styles.totalAmount}>INR ₹{totalPrice}</Text>
+          <Text style={styles.totalAmount}>INR {totalPrice.toFixed(2)}</Text>
+          
+          <View style={styles.separator} />
+
+          {pricingDetails.map((item, index) => (
+            <View key={index} style={styles.pricingTableRow}>
+              <Text style={styles.pricingTableCellTerm}>{item.term}</Text>
+              <Text style={[styles.pricingTableCellAmount, item.strikethrough ? { textDecoration: 'line-through' } : {}]}>{item.amount}</Text>
+            </View>
+          ))}
+
+          <View style={styles.notesSection}>
+            {pricingNotes.map((note, index) => {
+              if (note.includes('Education verification') && !isEducationCheckSelected) {
+                return null;
+              }
+              return <Text key={index} style={styles.noteText}>* {note}</Text>
+            })}
+          </View>
         </View>
 
         {/* Terms and Conditions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Terms & Conditions</Text>
-          <Text style={{ fontSize: 9, lineHeight: 1.4, color: '#374151' }}>
+          <Text style={{ fontSize: 9, lineHeight: 1.4, color: '#374151', marginTop: 10 }}>
             • All verification services will be provided through our certified partner network{'\n'}
             • Turnaround times are indicative and may vary based on data availability{'\n'}
             • Pricing is per verification check and excludes applicable taxes{'\n'}
@@ -252,7 +448,10 @@ export function AgreementTemplate({ brandName, logoUrl, selectedChecks, totalPri
         <View style={styles.footer}>
           <Text>
             This document is generated automatically by Equal Digital's Agreement Portal.{'\n'}
-            For questions or clarifications, please contact our support team.
+            For questions or clarifications, please contact our support team at{' '}
+            <Link src="mailto:support@equal.in" style={{ color: '#00b140', textDecoration: 'none' }}>
+              support@equal.in
+            </Link>
           </Text>
         </View>
       </Page>
