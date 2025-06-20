@@ -5,8 +5,11 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'ID Verification Agreement Portal',
-  description: 'Create customized ID verification agreements with real-time preview',
+  title: 'Equal Agreement Portal',
+  description: 'Create and customise your agreement with Equal',
+  icons: {
+    icon: '/eq-logo.svg',
+  },
 }
 
 export default function RootLayout({
