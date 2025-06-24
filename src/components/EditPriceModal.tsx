@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,16 +12,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { AgreementContext } from '@/lib/AgreementContext';
 
-interface EditPriceModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (newPrice: number) => void;
-  checkName: string;
-  originalPrice: number;
-}
+export function EditPriceModal() {
+  const { state, dispatch } = useContext(AgreementContext);
+  const { editingCheck } = state;
+  const isOpen = !!editingCheck;
+  const checkName = editingCheck?.name || '';
+  const originalPrice = editingCheck?.price || 0;
 
-export function EditPriceModal({ isOpen, onClose, onSave, checkName, originalPrice }: EditPriceModalProps) {
   const [price, setPrice] = useState(originalPrice);
   const [discount, setDiscount] = useState(0);
 
@@ -54,12 +53,17 @@ export function EditPriceModal({ isOpen, onClose, onSave, checkName, originalPri
   };
 
   const handleSave = () => {
-    onSave(price);
-    onClose();
+    if (editingCheck) {
+      dispatch({ type: 'SET_PRICE_OVERRIDE', payload: { name: editingCheck.name, price } });
+    }
+  };
+
+  const handleClose = () => {
+    dispatch({ type: 'CLOSE_PRICE_MODAL' });
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Price for {checkName}</DialogTitle>
@@ -85,7 +89,7 @@ export function EditPriceModal({ isOpen, onClose, onSave, checkName, originalPri
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={handleClose}>
             Discard
           </Button>
           <Button onClick={handleSave}>

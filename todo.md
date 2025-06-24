@@ -240,6 +240,28 @@ This document tracks all tasks for building the ID Verification Agreement Portal
 - [x] Implement deferred state updates for performance
 - [ ] Optimize re-rendering performance
 
+### State Management Review
+- [x] Create `AgreementContext.tsx` with a reducer and provider.
+- [x] Wrap `RootLayout` with `AgreementProvider`.
+- [x] Review state management in `src/app/page.tsx`.
+
+### Component Refactoring
+- [x] **Refactor `AgreementTemplate.tsx`**
+  - [x] Create `src/components/pdf` directory for PDF components.
+  - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+  - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+  - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+  - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+  - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+  - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+  - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+
+### Styling Improvements
+- [ ] **Review `globals.css` and `tailwind.config.ts` for efficiency.
+
+### Type Safety
+- [ ] **Enhance TypeScript usage in `src/types` and across the application.
+
 ---
 
 ## 🔒 Phase 7: Security & Validation
@@ -492,3 +514,3744 @@ This document tracks all tasks for building the ID Verification Agreement Portal
 
 **Last Updated:** December 2024
 **Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+## 📋 Notes & Decisions
+- **Data Strategy:** Using hardcoded TypeScript data structure instead of CSV uploads for reliability and performance
+- **UI Library:** Successfully integrated shadcn/ui for consistent design system
+- **Layout:** Implemented flexible viewport-responsive layout with sticky headers
+- **State Management:** Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature. Deferred state updates are now in place.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+**Last Updated:** December 2024
+**Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+## 📋 Notes & Decisions
+- **Data Strategy:** Using hardcoded TypeScript data structure instead of CSV uploads for reliability and performance
+- **UI Library:** Successfully integrated shadcn/ui for consistent design system
+- **Layout:** Implemented flexible viewport-responsive layout with sticky headers
+- **State Management:** Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature. Deferred state updates are now in place.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+**Last Updated:** December 2024
+**Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+## 📋 Notes & Decisions
+- **Data Strategy:** Using hardcoded TypeScript data structure instead of CSV uploads for reliability and performance
+- **UI Library:** Successfully integrated shadcn/ui for consistent design system
+- **Layout:** Implemented flexible viewport-responsive layout with sticky headers
+- **State Management:** Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature. Deferred state updates are now in place.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+**Last Updated:** December 2024
+**Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+## 📋 Notes & Decisions
+- **Data Strategy:** Using hardcoded TypeScript data structure instead of CSV uploads for reliability and performance
+- **UI Library:** Successfully integrated shadcn/ui for consistent design system
+- **Layout:** Implemented flexible viewport-responsive layout with sticky headers
+- **State Management:** Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature. Deferred state updates are now in place.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+**Last Updated:** December 2024
+**Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+## 📋 Notes & Decisions
+- **Data Strategy:** Using hardcoded TypeScript data structure instead of CSV uploads for reliability and performance
+- **UI Library:** Successfully integrated shadcn/ui for consistent design system
+- **Layout:** Implemented flexible viewport-responsive layout with sticky headers
+- **State Management:** Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature. Deferred state updates are now in place.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+**Last Updated:** December 2024
+**Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+## 📋 Notes & Decisions
+- **Data Strategy:** Using hardcoded TypeScript data structure instead of CSV uploads for reliability and performance
+- **UI Library:** Successfully integrated shadcn/ui for consistent design system
+- **Layout:** Implemented flexible viewport-responsive layout with sticky headers
+- **State Management:** Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature. Deferred state updates are now in place.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+**Last Updated:** December 2024
+**Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+## 📋 Notes & Decisions
+- **Data Strategy:** Using hardcoded TypeScript data structure instead of CSV uploads for reliability and performance
+- **UI Library:** Successfully integrated shadcn/ui for consistent design system
+- **Layout:** Implemented flexible viewport-responsive layout with sticky headers
+- **State Management:** Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature. Deferred state updates are now in place.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+**Last Updated:** December 2024
+**Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+## 📋 Notes & Decisions
+- **Data Strategy:** Using hardcoded TypeScript data structure instead of CSV uploads for reliability and performance
+- **UI Library:** Successfully integrated shadcn/ui for consistent design system
+- **Layout:** Implemented flexible viewport-responsive layout with sticky headers
+- **State Management:** Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature. Deferred state updates are now in place.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+**Last Updated:** December 2024
+**Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+## 📋 Notes & Decisions
+- **Data Strategy:** Using hardcoded TypeScript data structure instead of CSV uploads for reliability and performance
+- **UI Library:** Successfully integrated shadcn/ui for consistent design system
+- **Layout:** Implemented flexible viewport-responsive layout with sticky headers
+- **State Management:** Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature. Deferred state updates are now in place.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+**Last Updated:** December 2024
+**Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+## 📋 Notes & Decisions
+- **Data Strategy:** Using hardcoded TypeScript data structure instead of CSV uploads for reliability and performance
+- **UI Library:** Successfully integrated shadcn/ui for consistent design system
+- **Layout:** Implemented flexible viewport-responsive layout with sticky headers
+- **State Management:** Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature. Deferred state updates are now in place.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+**Last Updated:** December 2024
+**Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+## 📋 Notes & Decisions
+- **Data Strategy:** Using hardcoded TypeScript data structure instead of CSV uploads for reliability and performance
+- **UI Library:** Successfully integrated shadcn/ui for consistent design system
+- **Layout:** Implemented flexible viewport-responsive layout with sticky headers
+- **State Management:** Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature. Deferred state updates are now in place.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+**Last Updated:** December 2024
+**Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+## 📋 Notes & Decisions
+- **Data Strategy:** Using hardcoded TypeScript data structure instead of CSV uploads for reliability and performance
+- **UI Library:** Successfully integrated shadcn/ui for consistent design system
+- **Layout:** Implemented flexible viewport-responsive layout with sticky headers
+- **State Management:** Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature. Deferred state updates are now in place.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+---
+
+**Last Updated:** December 2024
+**Next Review:** After finalizing PDF download.
+
+### Optimization Plan
+
+**Phase 1: Codebase Analysis & Low-Hanging Fruit**
+
+- [x] **Project Overview:** Examine the project structure, dependencies in `package.json`, and Next.js configuration (`next.config.js`).
+- [x] **Component Analysis:** Review components in `src/components` for optimization opportunities (e.g., memoization, splitting large components).
+- [x] **Static Asset Optimization:** Check static assets in `public` for web optimization.
+- [x] **Code & Dependency Cleanup:** Find and remove unused files, dependencies, or code.
+
+**Phase 2: Performance Enhancements**
+
+- [x] **Bundle Size Analysis:** Use `@next/bundle-analyzer` to inspect the JavaScript bundle.
+  - [x] Install and configure `@next/bundle-analyzer`.
+  - [x] Run `npm run analyze` and analyze the output.
+- [x] **Code Splitting & Lazy Loading:** Identify components/pages for dynamic import with `next/dynamic`.
+- [x] **State Management Review:** Optimize application state management to reduce re-renders.
+  - [x] Create `AgreementContext.tsx` with a reducer and provider.
+  - [x] Wrap `RootLayout` with `AgreementProvider`.
+  - [x] Refactor `page.tsx` and all child components to use the context.
+
+**Phase 3: Refactoring & Best Practices**
+
+- [x] **Component Refactoring:** Refactor key components for readability, maintainability, and best practices.
+  - [x] **Refactor `AgreementTemplate.tsx`**
+    - [x] Create `src/components/pdf` directory for PDF components.
+    - [x] Move `PdfHeader` logic to `src/components/pdf/PdfHeader.tsx`.
+    - [x] Move `ServicesTable` logic to `src/components/pdf/ServicesTable.tsx`.
+    - [x] Move `InsightsTable` logic to `src/components/pdf/InsightsTable.tsx`.
+    - [x] Move `GenericTable` logic to `src/components/pdf/GenericTable.tsx`.
+    - [x] Move `PricingSummary` logic to `src/components/pdf/PricingSummary.tsx`.
+    - [x] Move `TermsAndConditions` logic to `src/components/pdf/TermsAndConditions.tsx`.
+    - [x] Move `PdfFooter` logic to `src/components/pdf/PdfFooter.tsx`.
+    - [x] Refactor `AgreementTemplate.tsx` to assemble the new, smaller components.
+- [ ] **Styling Improvements:** Review `globals.css` and `tailwind.config.ts` for efficiency.
+- [ ] **Type Safety:** Enhance TypeScript usage in `src/types` and across the application.
+
+---
+
+## 🎛️ Phase 7: Content Editing & Customization
+**Goal:** Allow users to edit all text and tables in the agreement.
+
+### State Management for Editable Content
+- [ ] **Extend `AgreementContext`**:
+    - [ ] Move `valueAddedServices`, `aggregatorServices`, and `pricingNotes` from `lib/agreement-data.ts` to `AgreementContext.tsx` to serve as the initial, editable state.
+    - [ ] Add new fields to the context state for all editable content:
+        - `agreementTitle: string` (for the main header).
+        - `agreementIntroText: string` (for the introductory paragraph).
+        - `valueAddedServices: { name: string; description: string }[]`.
+        - `aggregatorServices: { name: string; description: string }[]`.
+        - `pricingNotes: string[]`.
+        - `termsAndConditionsText: string`.
+    - [ ] Create a new reducer action, like `UPDATE_AGREEMENT_CONTENT`, to handle saving all changes from the modal at once.
+
+### Refactor PDF Components for Dynamic Content
+- [ ] **`PdfHeader.tsx`**: Modify to accept and render an `agreementTitle` prop.
+- [ ] **`AgreementTemplate.tsx`**:
+    - [ ] Update to pull all editable content (title, intro text, tables, notes, T&Cs) from `AgreementContext`.
+    - [ ] Pass the dynamic content down as props to the relevant child PDF components.
+    - [ ] Update the introductory text section to use `agreementIntroText` from the context.
+- [ ] **`GenericTable.tsx`**: This component is already data-driven, so it will just need to receive the editable `valueAddedServices` and `aggregatorServices` data from context via `AgreementTemplate`.
+- [ ] **`PricingSummary.tsx`**: Refactor to dynamically render editable `pricingNotes`.
+- [ ] **`TermsAndConditions.tsx`**: Modify to accept and render a `termsAndConditionsText` prop.
+
+### Enhance `AdditionalCostsModal.tsx` for Content Editing
+- [ ] **UI Overhaul with Tabs**:
+    - [ ] Reorganize the modal using a `Tabs` component (`components/ui/tabs`) to manage different editable sections without cluttering the UI. Create tabs like: "Fees & Notes", "Service Tables", and "Text Content".
+- [ ] **"Text Content" Tab**:
+    - [ ] Add an `Input` control for the `agreementTitle` ("ID Verification Agreement").
+    - [ ] Add a `Textarea` for the `agreementIntroText`.
+    - [ ] Add a `Textarea` for the `termsAndConditionsText`.
+- [ ] **"Fees & Notes" Tab**:
+    - [ ] Keep the existing inputs for "Set-up Fee" and "Annual Fee".
+    - [ ] Add a UI to manage the `pricingNotes`. This could be a `Textarea` (one note per line) or a dynamic list of `Input` fields with "Add" and "Remove" buttons.
+- [ ] **"Service Tables" Tab**:
+    - [ ] Create an editable grid/form for "Value-added Services". It should allow users to edit the name and description of each service and to add or remove rows.
+    - [ ] Do the same for "Aggregator Services".
+- [ ] **Update Save Logic**:
+    - [ ] On opening the modal, populate its local state with the current values from `AgreementContext`.
+    - [ ] Modify the `handleSave` function to dispatch the `UPDATE_AGREEMENT_CONTENT` action, sending all the updated fields back to the global state.
+
+---
+
+## 🐞 Phase 8: Testing & Bug Fixes
+**Goal:** Ensure the application is stable and bug-free
+
+### Testing
+- [ ] Write tests for utility functions
+- [ ] Test individual components
+- [ ] Test state management logic
+- [ ] Test PDF generation functions
+- [ ] Test data structure and filtering
+- [ ] Achieve 80%+ code coverage
+
+### Integration Testing
+- [ ] Test complete user flows
+- [ ] Test PDF generation end-to-end
+- [ ] Test file upload functionality
+- [ ] Test error handling scenarios
+- [ ] Test responsive design
+- [ ] Test accessibility features
+
+### Manual Testing
+- [ ] Test on different browsers
+- [ ] Test on mobile devices
+- [ ] Test with various file types and sizes
+- [ ] Test edge cases and error scenarios
+- [ ] User acceptance testing (UAT)
+- [ ] Performance testing under load
+
+---
+
+## 🚢 Phase 10: Deployment & Documentation
+**Goal:** Deploy application and create documentation
+
+### Deployment Preparation
+- [ ] Configure production environment variables
+- [ ] Set up deployment pipeline (Vercel/Netlify)
+- [ ] Configure domain and SSL
+- [ ] Set up monitoring and logging
+- [ ] Configure error tracking (Sentry)
+- [ ] Set up analytics (optional)
+
+### Documentation
+- [ ] Update README with setup instructions
+- [ ] Document API endpoints (if any)
+- [ ] Create user guide/manual
+- [ ] Document deployment process
+- [ ] Create troubleshooting guide
+- [ ] Add changelog and versioning
+
+### Launch Preparation
+- [ ] Final testing in production environment
+- [ ] Performance monitoring setup
+- [ ] Backup and recovery procedures
+- [ ] User training materials
+- [ ] Support documentation
+- [ ] Go-live checklist
+
+---
+
+## 📈 Phase 11: Post-Launch & Enhancements
+**Goal:** Monitor, maintain, and enhance the application
+
+### Monitoring & Maintenance
+- [ ] Set up uptime monitoring
+- [ ] Monitor user feedback and usage analytics
+- [ ] Regular security updates
+- [ ] Performance optimization based on usage
+- [ ] Bug fixes and improvements
+- [ ] Regular backups
+
+### Future Enhancements
+- [ ] User authentication system
+- [ ] Admin panel for managing checks/pricing
+- [ ] Multi-language support
+- [ ] E-signature integration
+- [ ] API for programmatic access
+- [ ] Advanced reporting features
+
+---
+
+## 📊 Progress Tracking
+
+**Overall Progress:** 80% (Core functionality complete)
+
+### Phase Completion Status:
+- [x] Phase 1: Project Setup & Foundation (14/14) ✅
+- [x] Phase 2: UI/UX Design & Layout (12/12) ✅
+- [x] Phase 3: Data Management & Processing (12/12) ✅
+- [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
+- [x] Phase 5: PDF Generation & Preview (16/17) ✅
+- [x] Phase 6: Integration & State Management (7/11)
+- [ ] Phase 7: Security & Validation (2/10)
+- [ ] Phase 8: Accessibility & Performance (0/13)
+- [ ] Phase 9: Testing (0/15)
+- [ ] Phase 10: Deployment & Documentation (0/12)
+- [ ] Phase 11: Post-Launch & Enhancements (0/12)
+
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+- ✅ Implemented deferred preview updates for better performance.
+- ✅ Added a loading spinner for PDF generation.
+
+### State Management:
+- ✅ Lifted state from `ControlPanel` to `Home` page, effectively creating a custom hook pattern for this feature.
+- ✅ Implemented deferred state updates to separate live data from preview data.
+- **Next Phase:** Finalize PDF download and then move to comprehensive testing.
+
+### PDF Preview & Generation (Phase 5):
+- ✅ Implemented live PDF preview with `@react-pdf/renderer`.
+- ✅ Fixed Content Security Policy (CSP) to allow WASM and blob rendering.
+- ✅ Corrected logo rendering by converting blobs to data URLs.
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel and preview.
+
+### Download Button:
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Layout & UX Improvements:
+- ✅ Added glassmorphism styling to control panel
+
+---
+
+## 🎯 Current Sprint Focus
+**Sprint Goal:** Implement the Journey Builder feature.
+**Priority Tasks:**
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
+
+---
+
+## 📋 Recent Accomplishments
+### Control Panel Enhancements:
+- ✅ Fixed logo upload "Replace" button functionality
+- ✅ Simplified IDCard component structure
+- ✅ Added responsive height layout (viewport-based)
+- ✅ Implemented "Clear All" functionality with consistent styling
+- ✅ Added selected verifications preview with badges
+- ✅ Enhanced layout with fixed/flexible sections
+- ✅ Added glassmorphism styling to control panel
+- ✅ Prevented layout shifts with invisible elements
+- ✅ Added category filter dropdown to search bar
+
+### Data Management:
+- ✅ Created comprehensive hardcoded data structure
+- ✅ Replaced CSV processing with reliable TypeScript data
+- ✅ Added detailed check information (TAT, method, partner network)
+- ✅ Implemented efficient filtering and search capabilities
+- ✅ Implemented responsive A4 aspect ratio for the preview.
+- ✅ Designed a professional PDF header with dual logos and centered brand name.
+- ✅ Lifted state to enable seamless data flow between control panel

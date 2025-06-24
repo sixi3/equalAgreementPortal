@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -16,45 +16,42 @@ import { idChecks, Check } from "@/lib/id-checks";
 import { IDCard } from "@/components/IDCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { X } from 'lucide-react';
-import { Journey } from '@/types';
-
-interface JourneyBuilderModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSaveJourney: (journeyName: string, selectedChecks: { [key: string]: boolean }) => void;
-  onUpdateJourney: (id: string, name: string, checks: { [key: string]: boolean }) => void;
-  journeyToEdit: Journey | null;
-  journeys: Journey[];
-  priceOverrides: { [key: string]: number };
-  onEditPrice: (checkName: string, currentPrice: number) => void;
-  onSpecialCheckSelect: (checkName: string) => void;
-  multipliers: { [key: string]: number };
-}
+import { AgreementContext } from '@/lib/AgreementContext';
 
 const SPECIAL_CHECKS = [
   'Highest Education*',
   'Employment & Conduct (Per check) - Last 7 years',
 ];
 
-export function JourneyBuilderModal({ isOpen, onClose, onSaveJourney, onUpdateJourney, journeyToEdit, journeys, priceOverrides, onEditPrice, onSpecialCheckSelect, multipliers }: JourneyBuilderModalProps) {
+export function JourneyBuilderModal() {
+  const { state, dispatch } = useContext(AgreementContext);
+  const { isJourneyModalOpen, editingJourney, journeys, priceOverrides, multipliers } = state;
+
   const [journeyName, setJourneyName] = useState("");
   const [selectedChecks, setSelectedChecks] = useState<{ [key: string]: boolean }>({});
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
 
   useEffect(() => {
-    if (journeyToEdit) {
-      setJourneyName(journeyToEdit.name);
-      setSelectedChecks(journeyToEdit.selectedChecks);
+    if (editingJourney) {
+      setJourneyName(editingJourney.name);
+      setSelectedChecks(editingJourney.selectedChecks);
     } else {
       setJourneyName("");
       setSelectedChecks({});
     }
-  }, [journeyToEdit, isOpen]);
+  }, [editingJourney, isJourneyModalOpen]);
 
   const handleCheckChange = (name: string, checked: boolean) => {
     if (checked && SPECIAL_CHECKS.includes(name) && !selectedChecks[name]) {
-      onSpecialCheckSelect(name);
+      dispatch({
+        type: 'OPEN_MULTIPLIER_MODAL',
+        payload: {
+          name,
+          label: name,
+          defaultValue: multipliers[name] || 1,
+        }
+      });
     }
     setSelectedChecks((prev) => ({ ...prev, [name]: checked }));
   };
@@ -71,18 +68,21 @@ export function JourneyBuilderModal({ isOpen, onClose, onSaveJourney, onUpdateJo
   }
 
   const handleSave = () => {
-    if (journeyToEdit) {
-      onUpdateJourney(journeyToEdit.id, journeyName, selectedChecks);
+    if (editingJourney) {
+      dispatch({ type: 'UPDATE_JOURNEY', payload: { id: editingJourney.id, name: journeyName, checks: selectedChecks } });
     } else {
-      onSaveJourney(journeyName, selectedChecks);
+      dispatch({ type: 'ADD_JOURNEY', payload: { name: journeyName, checks: selectedChecks } });
     }
-    onClose();
+  };
+
+  const handleClose = () => {
+    dispatch({ type: 'CLOSE_JOURNEY_MODAL' });
   };
 
   // Build a map of unavailable checks: { [checkName]: journeyName }
   const unavailableChecks: { [checkName: string]: string } = {};
   journeys.forEach(j => {
-    if (!journeyToEdit || j.id !== journeyToEdit.id) {
+    if (!editingJourney || j.id !== editingJourney.id) {
       Object.entries(j.selectedChecks).forEach(([check, val]) => {
         if (val) unavailableChecks[check] = j.name;
       });
@@ -100,12 +100,12 @@ export function JourneyBuilderModal({ isOpen, onClose, onSaveJourney, onUpdateJo
     }, {} as typeof idChecks);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isJourneyModalOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>{journeyToEdit ? 'Edit Journey' : 'Create a New Journey'}</DialogTitle>
+          <DialogTitle>{editingJourney ? 'Edit Journey' : 'Create a New Journey'}</DialogTitle>
           <DialogDescription>
-            {journeyToEdit ? 'Update the journey name or change the selected checks.' : 'Name your journey and select the verification checks you need.'}
+            {editingJourney ? 'Update the journey name or change the selected checks.' : 'Name your journey and select the verification checks you need.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -180,7 +180,7 @@ export function JourneyBuilderModal({ isOpen, onClose, onSaveJourney, onUpdateJo
                       method={check.method}
                       checked={!!selectedChecks[check.name]}
                       onChange={(checked) => handleCheckChange(check.name, !!checked)}
-                      onEditPrice={() => onEditPrice(check.name, currentPrice)}
+                      onEditPrice={() => dispatch({ type: 'OPEN_PRICE_MODAL', payload: { name: check.name, price: currentPrice } })}
                       insights={check.insights}
                       disabled={isUnavailable}
                       unavailableMessage={isUnavailable ? `Already part of ${unavailableChecks[check.name]}` : undefined}
@@ -193,11 +193,11 @@ export function JourneyBuilderModal({ isOpen, onClose, onSaveJourney, onUpdateJo
         </div>
 
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={handleClose}>
             Discard
           </Button>
           <Button onClick={handleSave} disabled={!journeyName || Object.keys(selectedChecks).filter(c => selectedChecks[c]).length === 0}>
-            {journeyToEdit ? 'Save Changes' : 'Save Journey'}
+            {editingJourney ? 'Save Changes' : 'Save Journey'}
           </Button>
         </DialogFooter>
       </DialogContent>

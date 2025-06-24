@@ -1,3 +1,7 @@
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -12,31 +16,11 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/:path*',
         headers: [
           {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
             key: 'Content-Security-Policy',
-            value: `
-              default-src 'self';
-              script-src 'self' 'unsafe-eval' 'unsafe-inline';
-              style-src 'self' 'unsafe-inline';
-              img-src 'self' data: blob:;
-              font-src 'self' data:;
-              connect-src 'self' data:;
-              frame-src 'self' blob:;
-            `.replace(/\s{2,}/g, ' ').trim(),
+            value: "frame-ancestors 'self'; img-src 'self' blob: data:; connect-src 'self' blob: data:;",
           },
         ],
       },
@@ -57,6 +41,7 @@ const nextConfig = {
 
     return config;
   },
+  transpilePackages: ['framer-motion'],
 }
 
-module.exports = nextConfig 
+module.exports = withBundleAnalyzer(nextConfig) 

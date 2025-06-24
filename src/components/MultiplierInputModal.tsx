@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,17 +12,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { AgreementContext } from '@/lib/AgreementContext';
 
-interface MultiplierInputModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (multiplier: number) => void;
-  checkName: string;
-  defaultValue?: number;
-  label: string;
-}
+export function MultiplierInputModal() {
+  const { state, dispatch } = useContext(AgreementContext);
+  const { editingMultiplier } = state;
+  const isOpen = !!editingMultiplier;
+  const checkName = editingMultiplier?.name || '';
+  const defaultValue = editingMultiplier?.defaultValue || 1;
+  const label = editingMultiplier?.label || '';
 
-export function MultiplierInputModal({ isOpen, onClose, onSave, checkName, defaultValue = 1, label }: MultiplierInputModalProps) {
   const [value, setValue] = useState(defaultValue);
 
   useEffect(() => {
@@ -30,12 +29,17 @@ export function MultiplierInputModal({ isOpen, onClose, onSave, checkName, defau
   }, [isOpen, defaultValue]);
 
   const handleSave = () => {
-    onSave(Math.max(1, value));
-    onClose();
+    if (editingMultiplier) {
+      dispatch({ type: 'SET_MULTIPLIER', payload: { name: editingMultiplier.name, multiplier: Math.max(1, value) } });
+    }
+  };
+
+  const handleClose = () => {
+    dispatch({ type: 'CLOSE_MULTIPLIER_MODAL' });
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Select Quantity</DialogTitle>
@@ -54,7 +58,7 @@ export function MultiplierInputModal({ isOpen, onClose, onSave, checkName, defau
           />
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={handleClose}>
             Discard
           </Button>
           <Button onClick={handleSave}>

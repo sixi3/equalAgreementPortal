@@ -16,4 +16,9 @@ export interface Journey {
   name: string
   selectedChecks: { [key: string]: boolean }
   totalPrice: number
+}
+
+export interface ValueAddedService {
+  name: string;
+  description: string;
 } 
