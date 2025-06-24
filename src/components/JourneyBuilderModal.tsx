@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { idChecks, Check } from "@/lib/id-checks";
 import { IDCard } from "@/components/IDCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { X } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 import { AgreementContext } from '@/lib/AgreementContext';
 
 const SPECIAL_CHECKS = [
@@ -122,11 +122,14 @@ export function JourneyBuilderModal() {
                 </div>
                 <div className="flex gap-2 items-center">
                     <div className="relative flex-1">
+                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground">
+                          <Search className="h-4 w-4 text-[#00b140]" />
+                        </span>
                         <Input 
                         placeholder="Search for a check" 
                         value={searchTerm} 
                         onChange={(e) => setSearchTerm(e.target.value)} 
-                        className="pr-8"
+                        className="pl-8 pr-8"
                         />
                         {searchTerm && (
                         <Button

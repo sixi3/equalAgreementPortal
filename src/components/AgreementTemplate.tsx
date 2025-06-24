@@ -83,6 +83,9 @@ export const AgreementTemplate = () => {
             {agreementIntro.replace('{brandName}', brandName || '[Client Name]')}
           </Text>
         </View>
+
+        {/* Services Tables */}
+        <ServicesTable />
         
         <PricingSummary 
             totalPrice={totalPrice} 
@@ -94,10 +97,10 @@ export const AgreementTemplate = () => {
             isEducationCheckSelected={isEducationCheckSelected}
         />
 
-        {/* Services Tables */}
-        <ServicesTable />
-
-        <InsightsTable />
+        {/* Add spacing above InsightsTable */}
+        <View style={{ marginTop: 24 }}>
+          <InsightsTable />
+        </View>
         
         <GenericTable title="Value-added Services" data={valueAddedServices} />
 

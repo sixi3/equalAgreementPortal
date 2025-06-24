@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Plus } from 'lucide-react'
+import { Plus, Pencil } from 'lucide-react'
 import { JourneyCard } from './JourneyCard'
 import { useRef, useState, useEffect, useContext } from 'react'
 import { AgreementContext } from '@/lib/AgreementContext'
@@ -39,7 +39,18 @@ export default function ControlPanel({
       <CardContent className="flex flex-col h-full p-4">
         {/* Journeys Section - Flexible Height */}
         <div className="flex flex-col flex-1 min-h-0">
-          <h3 className="text-[14px] font-medium tracking-widest text-slate-500 mb-2">JOURNEYS</h3>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-[14px] font-medium tracking-widest text-slate-500">JOURNEYS</h3>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="sm:hidden ml-2 p-2"
+              aria-label="Edit PDF"
+              onClick={() => dispatch({ type: 'OPEN_COSTS_MODAL' })}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </div>
           {journeys.length === 0 ? (
             <button
               onClick={() => dispatch({ type: 'OPEN_JOURNEY_MODAL', payload: null })}
