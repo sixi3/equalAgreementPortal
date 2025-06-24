@@ -1,30 +1,17 @@
 "use client"
 
-import { useState, useCallback, useEffect } from 'react'
-import { useDropzone, FileRejection } from 'react-dropzone'
 import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { IDCard } from '@/components/IDCard'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { idChecks } from '@/lib/id-checks'
 import { Separator } from '@/components/ui/separator'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2, X } from 'lucide-react'
-import { Check } from '@/lib/id-checks'
-import { cn } from '@/lib/utils'
-
-const PRE_OFFER_CHECKS = ['Aadhaar', 'PAN Basic', 'Criminal Court (CCRV)'].sort();
-const POST_OFFER_CHECKS = [
-  'Aadhaar',
-  'PAN Advanced (Aadhaar <> PAN Linkage)',
-  'Bank Account Validation',
-  'Criminal Court (CCRV)',
-  'Highest Education*',
-  'Employment & Conduct (Per check) - Last 7 years',
-].sort();
+import { Loader2, Plus } from 'lucide-react'
+import { Journey } from '@/types'
+import { JourneyCard } from './JourneyCard'
+import { useDropzone, FileRejection } from 'react-dropzone'
+import { useState, useCallback, useRef, useEffect } from 'react'
 
 function LogoUploader({ onLogoChange }: { onLogoChange: (file: File | null) => void }) {
   const [preview, setPreview] = useState<string | null>(null)
@@ -116,10 +103,10 @@ interface ControlPanelProps {
   setBrandName: (name: string) => void;
   logo: File | null;
   setLogo: (file: File | null) => void;
-  selectedChecks: { [key: string]: boolean };
-  setSelectedChecks: React.Dispatch<React.SetStateAction<{ [key: string]: boolean }>>;
+  journeys: Journey[];
+  onDeleteJourney: (id: string) => void;
+  onOpenModal: (journey: Journey | null) => void;
   totalPrice: number;
-  selectedCheckNames: string[];
   onDownload: () => void;
   onPreview: () => void;
   hasChanges: boolean;
@@ -131,91 +118,36 @@ export default function ControlPanel({
   setBrandName,
   logo,
   setLogo,
-  selectedChecks,
-  setSelectedChecks,
+  journeys,
+  onDeleteJourney,
+  onOpenModal,
   totalPrice,
-  selectedCheckNames,
   onDownload,
   onPreview,
   hasChanges,
   isPreviewLoading,
 }: ControlPanelProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('All');
-  const [activePreset, setActivePreset] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showBlur, setShowBlur] = useState(true);
 
-  useEffect(() => {
-    const currentSelection = Object.keys(selectedChecks).filter(k => selectedChecks[k]).sort();
-    
-    let matchesPreset: string | null = null;
-    
-    if (JSON.stringify(currentSelection) === JSON.stringify(PRE_OFFER_CHECKS)) {
-        matchesPreset = 'pre-offer';
-    } else if (JSON.stringify(currentSelection) === JSON.stringify(POST_OFFER_CHECKS)) {
-        matchesPreset = 'post-offer';
-    }
-    
-    if (matchesPreset !== activePreset) {
-      setActivePreset(matchesPreset);
-    }
-  }, [selectedChecks, activePreset]);
-
-  const handleCheckChange = (name: string, checked: boolean) => {
-    setSelectedChecks((prev) => ({ ...prev, [name]: checked }))
-  }
-  
-  const handleSelectAll = (_category: string, checks: Check[]) => {
-    const categoryCheckNames = checks.map(c => c.name);
-    const allSelected = categoryCheckNames.every(name => selectedChecks[name]);
-    
-    const newSelected = { ...selectedChecks };
-    categoryCheckNames.forEach(_name => {
-      newSelected[_name] = !allSelected;
-    });
-    setSelectedChecks(newSelected);
-  }
-
-  const handleClearAll = () => {
-    setSelectedChecks({});
-  }
-
-  const handlePresetChange = (value: string) => {
-    // If the clicked preset is already active, clear the selection.
-    if (activePreset === value) {
-      setSelectedChecks({});
-    } else {
-      // Otherwise, set the new preset's checks.
-      let checksToSelect: string[] = [];
-      if (value === 'pre-offer') {
-        checksToSelect = PRE_OFFER_CHECKS;
-      } else if (value === 'post-offer') {
-        checksToSelect = POST_OFFER_CHECKS;
-      }
-
-      const newSelected: { [key: string]: boolean } = {};
-      checksToSelect.forEach(name => {
-        newSelected[name] = true;
-      });
-      setSelectedChecks(newSelected);
-    }
+  const handleScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setShowBlur(el.scrollTop + el.clientHeight < el.scrollHeight - 2 && el.scrollHeight > el.clientHeight + 2);
   };
 
-  const filteredChecks = Object.entries(idChecks)
-    .filter(([category, _]) => categoryFilter === 'All' || category === categoryFilter)
-    .reduce((acc, [category, checks]) => {
-      const filtered = checks.filter(check => check.name.toLowerCase().includes(searchTerm.toLowerCase()));
-      if (filtered.length > 0) {
-        acc[category as keyof typeof idChecks] = filtered;
-      }
-      return acc;
-    }, {} as typeof idChecks);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setShowBlur(el.scrollTop + el.clientHeight < el.scrollHeight - 2 && el.scrollHeight > el.clientHeight + 2);
+  }, [journeys]);
 
   return (
-    <Card className="h-[100vh] bg-white/50 backdrop-blur-md">
+    <Card className="h-[100vh] bg-white">
       <CardContent className="flex flex-col h-full p-4">
         {/* Branding Section - Fixed Height */}
         <div className="space-y-2 flex-shrink-0">
-          <h3 className="text-[14px] font-medium text-slate-500">CUSTOMISE YOUR AGREEMENT</h3>
+          <h3 className="text-[14px] font-medium tracking-widest text-slate-500">CUSTOMISE YOUR AGREEMENT</h3>
           <div className="space-y-2">
             <Label htmlFor="brandName">Brand Name</Label>
             <Input id="brandName" placeholder="Enter your brand name" value={brandName} onChange={(e) => setBrandName(e.target.value)} />
@@ -225,130 +157,79 @@ export default function ControlPanel({
             <LogoUploader onLogoChange={setLogo} />
           </div>
         </div>
-        
-        <Separator className="mt-4 mb-2" />
 
-        {/* Verification Checks Section - Flexible Height */}
-        <div className="flex flex-col flex-1 min-h-0">
-          {/* Sticky Header */}
-          <div className="flex-shrink-0 space-y-4 pb-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-[14px] font-medium text-slate-500">CHOOSE YOUR VERIFICATIONS</h3>
-              <Button 
-                variant="link" 
-                size="sm" 
-                onClick={handleClearAll} 
-                className={`text-slate-600 hover:text-slate-800 ${selectedCheckNames.length === 0 ? 'invisible' : ''}`}
-              >
-                Clear All
-              </Button>
-            </div>
-            <div className="flex gap-2 items-center">
-              <div className="relative flex-1">
-                <Input 
-                  placeholder="Search for a check" 
-                  value={searchTerm} 
-                  onChange={(e) => setSearchTerm(e.target.value)} 
-                  className="pr-8"
-                />
-                {searchTerm && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute right-0 top-0 h-full w-8 text-muted-foreground hover:text-foreground"
-                    onClick={() => setSearchTerm('')}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
+        {/* Journeys Section - Flexible Height */}
+        <div className="flex flex-col flex-1 min-h-0 mt-4">
+          <h3 className="text-[14px] font-medium tracking-widest text-slate-500 mb-2">JOURNEYS</h3>
+          {journeys.length === 0 ? (
+            <button
+              onClick={() => onOpenModal(null)}
+              className="flex flex-col items-center justify-center w-full h-full bg-linear-to-br from-slate-100 to-slate-400 p-6 border-2 border-dashed border-slate-200 rounded-xl hover:bg-slate-500/5 transition-colors"
+            >
+              <div className="flex items-center justify-center w-10 h-10 bg-slate-600 rounded-full">
+                <Plus className="w-6 h-6 text-white" />
               </div>
-              <p className="text-xs text-slate-700">IN</p>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="All">All Checks</SelectItem>
-                  {Object.keys(idChecks).map(category => (
-                    <SelectItem key={category} value={category}>{category}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="pt-2">
-              <h3 className="text-[12px] font-medium text-slate-500 mb-2">BUNDLES:</h3>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePresetChange('pre-offer')}
-                  className={cn(
-                    "rounded-full",
-                    activePreset === 'pre-offer' && "border-green-800 bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700"
-                  )}
+              <span className="mt-2 text-md font-medium tracking-wide text-slate-500">Create New Journey</span>
+            </button>
+          ) : (
+            <div className="flex flex-col flex-1 min-h-0">
+              <div className="relative flex-1 min-h-0">
+                <div
+                  ref={scrollRef}
+                  onScroll={handleScroll}
+                  className="overflow-y-auto scrollbar-hide h-full"
+                  style={{ flex: '1 1 0%', minHeight: 0 }}
                 >
-                  Pre-Offer Checks
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePresetChange('post-offer')}
-                  className={cn(
-                    "rounded-full",
-                    activePreset === 'post-offer' && "border-green-800 bg-green-50 text-green-700 hover:bg-green-100 hover:text-green-700"
-                  )}
-                >
-                  Post-Offer Checks
-                </Button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Scrollable Content */}
-          <div className="flex-1 overflow-y-auto space-y-6 p-3">
-            {Object.entries(filteredChecks).map(([category, checks]) => (
-              <div key={category} className="space-y-3">
-                <div className="flex justify-between items-center">
-                  <Badge variant="secondary">{category}</Badge>
-                  <Button variant="link" size="sm" onClick={() => handleSelectAll(category, checks)}>Select All</Button>
-                </div>
-                <div className="grid grid-cols-1 gap-3">
-                  {checks.map((check) => (
-                    <IDCard
-                      key={check.name}
-                      name={check.name}
-                      price={`INR ₹${check.price}`}
-                      tat={check.tat}
-                      partnerNetwork={check.partnerNetwork}
-                      method={check.method}
-                      checked={!!selectedChecks[check.name]}
-                      onChange={(checked) => handleCheckChange(check.name, !!checked)}
-                      insights={check.insights}
+                  {journeys.map(journey => (
+                    <JourneyCard
+                      key={journey.id}
+                      journey={journey}
+                      onEdit={() => onOpenModal(journey)}
+                      onDelete={onDeleteJourney}
                     />
                   ))}
                 </div>
+                {/* Blur overlay at bottom to indicate scroll */}
+                {showBlur && (
+                  <div className="pointer-events-none absolute left-0 right-0 bottom-0 h-8 bg-gradient-to-t from-slate-100 via-slate-100/80 to-transparent" />
+                )}
               </div>
-            ))}
-          </div>
+              <div style={{ minHeight: 40, maxHeight: 120 }} className="flex items-end py-4 border-t border-slate-200">
+                <button
+                  onClick={() => onOpenModal(null)}
+                  className="flex flex-col items-center justify-center w-full h-full p-3 border-2 border-dashed border-slate-300 rounded-lg hover:bg-slate-500/5 transition-colors"
+                >
+                  <div className="flex items-center justify-center w-6 h-6 bg-slate-600 rounded-full">
+                    <Plus className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="mt-1 text-md font-medium tracking-wide text-slate-500">Create New Journey</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Total Price Section - Fixed Height */}
-        <div className="border-t flex-shrink-0">
-          <div className="space-y-4">
-            <div>
-              <div className="overflow-y-auto rounded-lg pt-2 flex flex-wrap gap-1 items-center bg-transparent">
-                {selectedCheckNames.length > 0 ? (
-                  selectedCheckNames.map(name => (
-                    <Badge key={name} variant="secondary" className="font-normal">{name}</Badge>
-                  ))
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    Selected checks will appear here.
-                  </p>
-                )}
-              </div>
+        <div className="border-t flex-shrink-0 pt-2 mt-2">
+          <div className="space-y-2">
+            <h3 className="text-[14px] font-medium text-slate-500">COST BREAKDOWN</h3>
+            <div className="max-h-24 overflow-y-auto space-y-1">
+              {journeys.length > 0 ? (
+                journeys.map(j => (
+                  <div key={j.id} className="flex justify-between items-center text-sm">
+                    <span className="text-slate-600">{j.name}</span>
+                    <span className="font-medium text-slate-800">₹{j.totalPrice.toLocaleString('en-IN')}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  No journeys created yet.
+                </p>
+              )}
             </div>
+          </div>
+          <div>
+            <Separator className="my-3"/>
             <div className="flex justify-between items-center">
               <div className="flex items-baseline">
                 <span className="text-2xl font-bold">₹{totalPrice.toLocaleString('en-IN')}</span>

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet, Image, Link, Font } from '@react-pdf/renderer'
-import { Check } from '@/types'
+import { Check, Journey } from '@/types'
+import { idChecks } from '@/lib/id-checks'
 
 import InterRegular from '@fontsource/inter/files/inter-latin-400-normal.woff'
 import InterBold from '@fontsource/inter/files/inter-latin-700-normal.woff'
@@ -9,8 +10,14 @@ import InterItalic from '@fontsource/inter/files/inter-latin-400-italic.woff'
 interface AgreementTemplateProps {
   brandName: string
   logoUrl?: string
-  selectedChecks: Check[]
+  journeys: Journey[]
   totalPrice: number
+  priceOverrides: { [key: string]: number };
+  multipliers: { [key: string]: number };
+  setupFee: number;
+  annualFee: number;
+  defaultSetupFee: number;
+  defaultAnnualFee: number;
 }
 
 Font.register({
@@ -173,35 +180,38 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   totalAmount: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: 'bold',
-    color: '#22c55e',
+    color: '#1E293B', // slate-800
   },
   pricingTableRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingTop: 8,
-    paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#d1fae5',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   pricingTableCellTerm: {
-    fontSize: 10,
-    color: '#374151',
-    width: '60%',
+    fontSize: 9,
+    color: '#475569', // slate-600
   },
   pricingTableCellAmount: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 'bold',
-    color: '#1f2937',
-    width: '40%',
-    textAlign: 'right',
+    color: '#1E293B', // slate-800
+  },
+  strikethroughText: {
+    textDecoration: 'line-through',
+    color: '#1e1e1e', // slate-400
+    fontSize: 9,
+    fontWeight: 'bold',
+  },
+  amountContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'flex-end',
   },
   notesSection: {
-    marginTop: 15,
-    backgroundColor: '#f8fafc',
-    padding: 10,
-    borderRadius: 3,
+    marginTop: 12,
   },
   noteText: {
     fontSize: 8,
@@ -211,8 +221,8 @@ const styles = StyleSheet.create({
   },
   separator: {
     borderBottomWidth: 1,
-    borderBottomColor: '#99e6b3',
-    marginVertical: 15,
+    borderBottomColor: '#E2E8F0', // slate-200
+    marginVertical: 12,
   },
   footer: {
     marginTop: 30,
@@ -235,12 +245,24 @@ const styles = StyleSheet.create({
   },
 })
 
-export function AgreementTemplate({ brandName, logoUrl, selectedChecks, totalPrice }: AgreementTemplateProps) {
+export function AgreementTemplate({ brandName, logoUrl, journeys, totalPrice, priceOverrides, multipliers, setupFee, annualFee, defaultSetupFee, defaultAnnualFee }: AgreementTemplateProps) {
   const currentDate = new Date().toLocaleDateString('en-GB', {
     day: '2-digit',
     month: 'long',
     year: 'numeric'
   })
+
+  // Derive flattened checks from journeys for downstream logic (insights, notes, etc.)
+  const selectedChecks: Check[] = journeys
+    .flatMap(j => Object.keys(j.selectedChecks).filter(name => j.selectedChecks[name]))
+    .map(name => {
+      for (const category in idChecks) {
+        const check = idChecks[category as keyof typeof idChecks].find(c => c.name === name);
+        if (check) return check;
+      }
+      return null;
+    })
+    .filter((c): c is Check => c !== null);
 
   const isEducationCheckSelected = selectedChecks.some(check => check.name === 'Highest Education*');
   const checksWithInsights = selectedChecks.filter(check => check.insights);
@@ -285,7 +307,7 @@ export function AgreementTemplate({ brandName, logoUrl, selectedChecks, totalPri
                   <Text style={styles.tableCellHeader}>Service Name</Text>
                 </View>
                 <View style={styles.tableColHeader}>
-                  <Text style={styles.tableCellHeader}>Method</Text>
+                  <Text style={styles.tableCellHeader}>Journey</Text>
                 </View>
                 <View style={styles.tableColHeader}>
                   <Text style={styles.tableCellHeader}>TAT</Text>
@@ -299,28 +321,87 @@ export function AgreementTemplate({ brandName, logoUrl, selectedChecks, totalPri
               </View>
               
               {/* Table Rows */}
-              {selectedChecks.map((check, index) => (
-                <View style={styles.tableRow} key={index}>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>{check.name}</Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>{check.method}</Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>{check.tat}</Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>{check.partnerNetwork}</Text>
-                  </View>
-                  <View style={styles.tableCol}>
-                    <Text style={styles.tableCell}>INR {check.price}</Text>
-                  </View>
-                </View>
-              ))}
+              {journeys.map(journey => 
+                Object.keys(journey.selectedChecks)
+                  .filter(name => journey.selectedChecks[name])
+                  .map(checkName => {
+                    const check = selectedChecks.find(c => c.name === checkName);
+                    if (!check) return null;
+                    const basePrice = priceOverrides[check.name] ?? check.price;
+                    const multiplier = multipliers[check.name] || 1;
+                    const finalPrice = basePrice * multiplier;
+                    return (
+                      <View style={styles.tableRow} key={check.name}>
+                        <View style={styles.tableCol}>
+                          <Text style={styles.tableCell}>{check.name}</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                          <Text style={styles.tableCell}>{journey.name}</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                          <Text style={styles.tableCell}>{check.tat}</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                          <Text style={styles.tableCell}>{check.partnerNetwork}</Text>
+                        </View>
+                        <View style={styles.tableCol}>
+                          <Text style={styles.tableCell}>INR {finalPrice}</Text>
+                        </View>
+                      </View>
+                    );
+                  })
+              )}
             </View>
           </View>
         )}
+
+        {/* Total Price */}
+        <View style={styles.totalSection}>
+          <Text style={styles.totalLabel}>Total Cost per Onboarding:</Text>
+          <Text style={styles.totalAmount}>INR {totalPrice.toFixed(2)}</Text>
+          
+          <View style={styles.separator} />
+
+          <View>
+            <View style={styles.pricingTableRow}>
+                <Text style={styles.pricingTableCellTerm}>Set-up Fee + Integration cost (One time Fee)</Text>
+                <View style={styles.amountContainer}>
+                    {setupFee === defaultSetupFee ? (
+                        <Text style={styles.strikethroughText}>
+                            INR {new Intl.NumberFormat('en-IN').format(setupFee)}
+                        </Text>
+                    ) : (
+                        <Text style={styles.strikethroughText}>
+                            INR {new Intl.NumberFormat('en-IN').format(setupFee)}
+                        </Text>
+                    )}
+                </View>
+            </View>
+            <View style={styles.pricingTableRow}>
+                <Text style={styles.pricingTableCellTerm}>Value-added Service paid yearly once (Prepay Annual)</Text>
+                <View style={styles.amountContainer}>
+                    {annualFee === defaultAnnualFee ? (
+                        <Text style={styles.strikethroughText}>
+                            INR {new Intl.NumberFormat('en-IN').format(annualFee)}
+                        </Text>
+                    ) : (
+                        <Text style={styles.strikethroughText}>
+                            INR {new Intl.NumberFormat('en-IN').format(annualFee)}
+                        </Text>
+                    )}
+                </View>
+            </View>
+          </View>
+
+          <View style={styles.notesSection}>
+            {pricingNotes.map((note, index) => {
+              if (note.includes('Education verification') && !isEducationCheckSelected) {
+                return null;
+              }
+              return <Text key={index} style={styles.noteText}>* {note}</Text>
+            })}
+          </View>
+        </View>
 
         {/* Insights Table */}
         {checksWithInsights.length > 0 && (
@@ -405,30 +486,6 @@ export function AgreementTemplate({ brandName, logoUrl, selectedChecks, totalPri
                 </View>
               </View>
             ))}
-          </View>
-        </View>
-
-        {/* Total Price */}
-        <View style={styles.totalSection}>
-          <Text style={styles.totalLabel}>Total Cost per Onboarding:</Text>
-          <Text style={styles.totalAmount}>INR {totalPrice.toFixed(2)}</Text>
-          
-          <View style={styles.separator} />
-
-          {pricingDetails.map((item, index) => (
-            <View key={index} style={styles.pricingTableRow}>
-              <Text style={styles.pricingTableCellTerm}>{item.term}</Text>
-              <Text style={[styles.pricingTableCellAmount, item.strikethrough ? { textDecoration: 'line-through' } : {}]}>{item.amount}</Text>
-            </View>
-          ))}
-
-          <View style={styles.notesSection}>
-            {pricingNotes.map((note, index) => {
-              if (note.includes('Education verification') && !isEducationCheckSelected) {
-                return null;
-              }
-              return <Text key={index} style={styles.noteText}>* {note}</Text>
-            })}
           </View>
         </View>
 

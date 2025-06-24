@@ -12,7 +12,7 @@ export const idChecks: Record<string, Check[]> = {
   "Identity Checks": [
     { name: 'Aadhaar', price: 30, tat: 'Instant', partnerNetwork: '5 Data Partners', method: 'Digi-locker / OCR' },
     { name: 'PAN Basic', price: 30, tat: 'Instant', partnerNetwork: '5 Data Partners', method: 'Digital Fetch' },
-    { name: 'PAN Advanced (Aadhaar <> PAN Linkage)', price: 45, tat: 'Instant', partnerNetwork: '5 Data Partners', method: 'Digital Fetch', insights: 'Equal will provide name mismatch check with Aadhaar' },
+    { name: 'PAN Adv (Aadhaar<>PAN Linkage)', price: 45, tat: 'Instant', partnerNetwork: '5 Data Partners', method: 'Digital Fetch', insights: 'Equal will provide name mismatch check with Aadhaar' },
     { name: 'Bank Account Validation', price: 30, tat: 'Instant', partnerNetwork: '5 Data Partners', method: 'Digital Fetch', insights: 'Equal will provide name mismatch check with Aadhaar' },
     { name: 'Voter ID', price: 30, tat: 'Instant', partnerNetwork: '5 Data Partners', method: 'Digital Fetch' },
     { name: 'Driving License', price: 30, tat: 'Instant', partnerNetwork: '5 Data Partners', method: 'Digital Fetch' },

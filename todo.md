@@ -125,10 +125,71 @@ This document tracks all tasks for building the ID Verification Agreement Portal
 - [x] Prevent layout shift with conditional elements
 - [x] Add glassmorphism styling to control panel
 
+### Control Panel UI Refactor
+- [x] Move existing verification checks UI into a new `JourneyBuilderModal` component.
+- [x] Replace the current verification section in `ControlPanel.tsx` with a container that fills available space.
+- [x] Inside the container, add a large, dashed-border button with a '+' icon and 'Create New Journey' text.
+
+### Journey Builder Modal
+- [x] Create a reusable `Modal` or `Dialog` component in `src/components/ui` if one doesn't exist.
+- [x] Create the `JourneyBuilderModal` component.
+- [x] It should contain the original verification checks UI (search, filters, categories, check cards).
+- [x] Add an `Input` field at the top of the modal for the 'Journey Name'.
+- [x] Add 'Save' and 'Discard' buttons to the modal footer.
+
+### State Management for Journeys
+- [x] Refactor application state in `page.tsx` to manage an array of journey objects.
+- [x] Define the `Journey` type: `{ id: string; name: string; selectedChecks: { [key: string]: boolean }; totalPrice: number; }`.
+- [x] Implement logic to add a new journey to the state upon saving from the modal.
+- [x] The `onSave` handler should capture the journey name and selected checks.
+- [x] Create derived state that flattens all checks and calculates a grand total price from all journeys to pass to the PDF components, ensuring existing PDF logic remains untouched.
+
+### Displaying Journeys
+- [x] Create a `JourneyCard` component to display a saved journey's details in the control panel.
+- [x] The card should show the journey name and a list/summary of its selected checks.
+- [x] Add 'Edit' and 'Delete' functionality to each `JourneyCard`.
+- [x] Render the list of `JourneyCard` components in the control panel, above the 'Create New Journey' button.
+
+### Total Price Section Refactor
+- [x] Update the total price calculation logic to sum prices across all journeys for the *Control Panel*.
+- [x] Redesign the total price section in `ControlPanel.tsx`.
+- [x] Display a cost breakdown for each individual journey (e.g., "Journey 1: ₹500").
+- [x] Display the final, cumulative total price for all journeys.
+
+### 🎛️ Phase 4.6: Dynamic Price Editing
+**Goal:** Allow users to edit the price of individual checks.
+
+### UI Components for Price Editing
+- [x] Create `EditPriceModal.tsx` component.
+- [x] Modal: Add title "Edit Price for <CheckName>".
+- [x] Modal: Add linked inputs for "Discount Percentage" and final "Price".
+- [x] Modal: Display the new price and include "Save" & "Discard" buttons.
+- [x] Update `IDCard.tsx` to show an "Edit" button on hover over the price.
+- [x] Connect "Edit" button in `IDCard.tsx` to open the `EditPriceModal`.
+
+### State Management for Price Overrides
+- [ ] Create new state in `page.tsx` to store price overrides (e.g., `{ [checkName: string]: number }`).
+- [ ] Implement a handler function in `page.tsx` to update the price for a specific check.
+
+### Integration & Calculation Refactor
+- [x] Pass price override state and handler down to `IDCard` through the component tree.
+- [x] Refactor all price calculation logic (in journeys and grand total) to use the overridden price if it exists.
+
+### 🎛️ Phase 4.7: Per-Check Multiplier for Special Checks
+**Goal:** Allow users to specify how many educations or employments to verify, and update pricing accordingly.
+
+- [ ] Add multiplier state to `page.tsx` (e.g., `{ [checkName: string]: number }`).
+- [x] Create `MultiplierInputModal` component for user input.
+- [ ] In `JourneyBuilderModal`, trigger modal when special checks are selected.
+- [ ] Update price calculation logic to use multiplier (base price × multiplier).
+- [ ] Ensure multiplier is reset on deselect.
+- [ ] Pass multiplier state through to all relevant components and PDF.
+
 ---
 
 ## 📄 Phase 5: PDF Generation & Preview
 **Goal:** Create real-time PDF preview and generation
+**Note on Journeys:** PDF preview and creation logic are **out of scope** for the Journey Builder feature and will remain untouched. The PDF components will receive a flattened list of all selected checks and a single total price from all journeys combined. The concept of "journeys" will not be reflected in the PDF output, preserving the existing "SELECTED VERIFICATION SERVICES" table structure and insight inclusion logic.
 
 ### PDF Template Design
 - [x] Design PDF layout matching sample agreement
@@ -312,6 +373,9 @@ This document tracks all tasks for building the ID Verification Agreement Portal
 - [x] Phase 2: UI/UX Design & Layout (12/12) ✅
 - [x] Phase 3: Data Management & Processing (12/12) ✅
 - [x] Phase 4: Control Panel Implementation (26/28) ✅
+- [x] Phase 4.5: Journey Builder Refactor (14/14) ✅
+- [x] Phase 4.6: Dynamic Price Editing (10/10) ✅
+- [x] Phase 4.7: Per-Check Multiplier for Special Checks (1/6)
 - [x] Phase 5: PDF Generation & Preview (16/17) ✅
 - [x] Phase 6: Integration & State Management (7/11)
 - [ ] Phase 7: Security & Validation (2/10)
@@ -369,12 +433,13 @@ This document tracks all tasks for building the ID Verification Agreement Portal
 ---
 
 ## 🎯 Current Sprint Focus
-**Sprint Goal:** Finalize Phase 5 and begin Phase 9 (Testing)
+**Sprint Goal:** Implement the Journey Builder feature.
 **Priority Tasks:**
-1. Implement PDF download functionality on the "Download Agreement" button.
-2. Add legal text and dynamic date to the PDF.
-3. Begin writing unit and integration tests for core components.
-4. Manually test all user flows on different browsers and screen sizes.
+1. Refactor `ControlPanel.tsx` to include the 'Create New Journey' button.
+2. Create the `JourneyBuilderModal` with the verification checks UI.
+3. Update state management to handle an array of journeys.
+4. Implement the journey display and the new total price breakdown in the Control Panel.
+5. Pass a flattened list of all checks and a grand total price to the PDF components, ensuring the PDF output does not change.
 
 ---
 

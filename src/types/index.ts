@@ -9,4 +9,11 @@ export interface Check {
 
 export interface SelectedChecks {
   [key: string]: boolean
+}
+
+export interface Journey {
+  id: string
+  name: string
+  selectedChecks: { [key: string]: boolean }
+  totalPrice: number
 } 
